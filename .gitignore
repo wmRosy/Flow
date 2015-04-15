@@ -10,6 +10,6 @@
 *.pcbdocpreview
 *.uvoptx
 JLinkLog.txt
-Project/KEIL5/Listings
-Project/KEIL5/Output
-JLinkLog.txt
+Flow-master/output
+*.Joy
+
