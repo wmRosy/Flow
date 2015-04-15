@@ -1,0 +1,15 @@
+*.bak
+*.old
+*.mo
+*.suo
+*.ncb
+*.user
+*.log
+*.csv
+*.schdocpreview
+*.pcbdocpreview
+*.uvoptx
+JLinkLog.txt
+Project/KEIL5/Listings
+Project/KEIL5/Output
+JLinkLog.txt
