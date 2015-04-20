@@ -24,4 +24,5 @@ px4flow.bin
 .settings
 *.sublime-workspace
 build*/
+output
 
