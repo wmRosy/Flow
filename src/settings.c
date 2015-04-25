@@ -103,7 +103,7 @@ void global_data_reset_param_defaults(void){
 	global_data.param_access[PARAM_IMAGE_HEIGHT] = READ_ONLY;
 
 	global_data.param[PARAM_IMAGE_LOW_LIGHT] = 0;
-//	global_data.param[PARAM_IMAGE_LOW_LIGHT] = 1;
+	global_data.param[PARAM_IMAGE_LOW_LIGHT] = 1;
 	strcpy(global_data.param_name[PARAM_IMAGE_LOW_LIGHT], "IMAGE_L_LIGHT");
 	global_data.param_access[PARAM_IMAGE_LOW_LIGHT] = READ_WRITE;
 
