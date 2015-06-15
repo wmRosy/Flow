@@ -36,6 +36,7 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <math.h>
 #include "stm32f4xx.h"
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_adc.h"
@@ -51,8 +52,8 @@
 #include "sonar_mode_filter.h"
 
 #define SONAR_SCALE	1000.0f
-#define SONAR_MIN	0.12f		/** 0.12m sonar minimum distance */
-#define SONAR_MAX	3.5f		/** 3.50m sonar maximum distance */
+#define SONAR_MIN	0.02f		/** 0.12m sonar minimum distance */
+#define SONAR_MAX	4.5f		/** 3.50m sonar maximum distance */
 
 extern int atoi (__const char *__nptr);
 extern uint32_t get_boot_time_us(void);
@@ -81,7 +82,45 @@ float sonar_raw = 0.0f;  // m
 float sonar_mode = 0.0f;
 float sonar_valid = false;				/**< the mode of all sonar measurements */
 
+#define SONAR_TIMEOUT 60000			// 0.06 second, ~10 meter
+#define SOUND_SPEED 3.4f			// sound speed in mm/10us
+#define SONAR_MIN_SR04 20			// min valid distance in milli-meter
+#define SONAR_MAX_SR04 5000			// max valid distance in milli-meter
+
 int sr04_initialized = 0;
+static int64_t trigger_time = 0;
+static int rising_time = -1;
+
+// private sonar variables
+bool timeout = false;
+static int private_sonar_initialized = 0;
+int last_pulse_time = -1;
+int first_pulse_time = -1;
+int pulse_counter = 0;
+float distance = NAN;
+
+#define DEADBAND 0
+#define PULSE_TIMEOUT 50
+#define MIN_PULSE_COUNT 4
+
+inline void delay_private()
+{
+	for(volatile int i=0; i<172; i++)
+		;
+}
+
+void reset_timer()
+{
+	TIM_Cmd(TIM5, DISABLE);
+	TIM5->CNT = 0;
+	timeout = false;
+	pulse_counter = 0;
+	last_pulse_time = -1;
+	first_pulse_time = -1;
+	TIM_Cmd(TIM5, ENABLE);
+	distance = NAN;
+}
+
 /**
   * @brief  Triggers the sonar to measure the next value
   *
@@ -100,7 +139,51 @@ void sonar_trigger(){
 		while(time == TIM6->CNT);
 		
 		GPIO_ResetBits(GPIOD, GPIO_Pin_14);
-	}		
+		
+		trigger_time = get_boot_time_us();
+	}
+	
+	if (private_sonar_initialized)
+	{
+		GPIO_ResetBits(GPIOD, GPIO_Pin_14);	// pull down comparator modifier
+		
+		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		delay_private();
+		
+		GPIO_SetBits(GPIOD, GPIO_Pin_14);	// release comparator modifier
+		
+		reset_timer();
+	}
 }
 
 /**
@@ -150,6 +233,7 @@ void UART4_IRQHandler(void)
 					sonar_mode = insert_sonar_value_and_get_mode_value(valid_data / SONAR_SCALE);
 					new_value = 1;
 					sonar_valid = true;
+					
 				} else {
 					sonar_valid = false;
 				}
@@ -194,6 +278,14 @@ void sonar_filter()
   */
 bool sonar_read(float* sonar_value_filtered, float* sonar_value_raw)
 {
+	// check SR04 timeout
+	if (sr04_initialized && trigger_time > 0 && get_boot_time_us() - trigger_time > SONAR_TIMEOUT)
+	{
+		printf("TIMEOUT\n");
+		sonar_valid = false;
+		trigger_time = 0;
+	}
+	
 	/* getting new data with only around 10Hz */
 	if (new_value) {
 		sonar_filter();
@@ -212,60 +304,109 @@ bool sonar_read(float* sonar_value_filtered, float* sonar_value_raw)
 	return sonar_valid;
 }
 
-#define SONAR_TIMEOUT 1000000
-#define SOUND_SPEED 3.4f			// sound speed in mm/10us
-#define SONAR_MIN_SR04 20			// min valid distance in milli-meter
-#define SONAR_MAX_SR04 5000			// max valid distance in milli-meter
+void take_mesaure(float measure)
+{
+	last_measure_time = measure_time;
+	measure_time = get_boot_time_us();
+	sonar_measure_time_interrupt = measure_time;
+	dt = ((float)(measure_time - last_measure_time)) / 1000000.0f;
+	
+	printf("R%f\n", measure);
 
-static int64_t last_send = -SONAR_TIMEOUT;
-static int rising_time = -1;
+	valid_data = measure*1000;
+	sonar_mode = insert_sonar_value_and_get_mode_value(measure);
+	new_value = 1;
+	sonar_valid = true;
+	trigger_time = 0;
+}
 
 void EXTI9_5_IRQHandler(void)
 {
-	volatile int time = TIM6->CNT;
-	if(GPIOA->IDR & GPIO_Pin_8)
-		rising_time = time;
-	else if (rising_time > 0)
+	// ignore any pulses if not triggered by caller
+	if (sr04_initialized && trigger_time > 0)
 	{
-		volatile int delta_time = time - rising_time;
-		if (delta_time < 0)
-			delta_time += 60000;
-		int temp = delta_time * SOUND_SPEED/2;
-		if (temp <= SONAR_MAX_SR04 && temp >= SONAR_MIN_SR04)
+		volatile int time = TIM6->CNT;
+		if(GPIOA->IDR & GPIO_Pin_8)
+			rising_time = time;
+		else if (rising_time > 0)
 		{
-			/* it is in normal sensor range, take it */
-			last_measure_time = measure_time;
-			measure_time = get_boot_time_us();
-			sonar_measure_time_interrupt = measure_time;
-			dt = ((float)(measure_time - last_measure_time)) / 1000000.0f;
-			
-			printf("R%d\n", temp);
+			volatile int delta_time = time - rising_time;
+			if (delta_time < 0)
+				delta_time += 60000;
+			int temp = delta_time * SOUND_SPEED/2;
+			if (temp <= SONAR_MAX_SR04 && temp >= SONAR_MIN_SR04)
+			{
+				/* it is in normal sensor range, take it */
+				last_measure_time = measure_time;
+				measure_time = get_boot_time_us();
+				sonar_measure_time_interrupt = measure_time;
+				dt = ((float)(measure_time - last_measure_time)) / 1000000.0f;
+				
+				printf("R%d\n", temp);
 
-			valid_data = temp;
-			sonar_mode = insert_sonar_value_and_get_mode_value(valid_data / SONAR_SCALE);
-			new_value = 1;
-			sonar_valid = true;
+				valid_data = temp;
+				sonar_mode = insert_sonar_value_and_get_mode_value(valid_data / SONAR_SCALE);
+				new_value = 1;
+				sonar_valid = true;
+				trigger_time = 0;
+			}
+			else
+			{
+				printf("R-1\n");
+				sonar_valid = false;
+			}
+			rising_time = -1;
 		}
 		else
 		{
-			printf("R-1\n");
 			sonar_valid = false;
+			rising_time = -1;	// no corresponding rising edge.
+			trigger_time = -1;
 		}
-		rising_time = -1;
 	}
-	else
+	
+	if (private_sonar_initialized)
 	{
-		sonar_valid = false;
-		rising_time = -1;	// no corresponding rising edge.
-		last_send = -1;
+		volatile int t = TIM5->CNT;
+		
+		if (t > DEADBAND && !timeout)
+	{
+		//
+		if (t-last_pulse_time > PULSE_TIMEOUT)
+		{
+			pulse_counter = 0;
+			first_pulse_time = t;
+		}
+		else
+		{
+			pulse_counter ++;
+		}
+		
+		if (pulse_counter >= MIN_PULSE_COUNT)
+		{
+			distance = first_pulse_time*0.000001 * 340/2;
+			printf("%f\n", distance);
+			take_mesaure(distance);
+			timeout = true;
+		}
+			
+		last_pulse_time = t;
+	}
 	}
 
 	EXTI_ClearITPendingBit(EXTI_Line8);
 }
 
+void TIM5_IRQHandler(void)
+{
+	TIM_ClearITPendingBit(TIM5 , TIM_FLAG_Update);
+	TIM_Cmd(TIM5, DISABLE);
+	timeout = true;
+}
+
 
 /**
- * @brief  Configures the sonar sensor Peripheral.
+ * @brief  Configures the SR-04 sonar sensor Peripheral.
  */
 void sonar_config_hc_sr04(void)
 {
@@ -322,13 +463,89 @@ void sonar_config_hc_sr04(void)
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
-	
+		
 	sr04_initialized = 1;
+}
+
+/**
+ * @brief  Configures the private sonar sensor Peripheral.
+ */
+void sonar_config_private()
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	EXTI_InitTypeDef   EXTI_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+
+	// TIM5 as timer and timeout controller
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+	TIM_TimeBaseStructure.TIM_Prescaler = 84-1;
+	TIM_TimeBaseStructure.TIM_Period = 60000-1;		// ~60ms overflow, 1us per tick
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
+	TIM_Cmd(TIM5, ENABLE);
+	TIM_ITConfig(TIM5,TIM_IT_Update,ENABLE);
+
+	// D14 as comparator modifier
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_14;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
+	GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+	
+	// B12 as sender
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+	GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+	
+	// A8 as echo
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	// EXTI
+	EXTI_ClearITPendingBit(EXTI_Line8);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource8);
+
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	EXTI_InitStructure.EXTI_Line = EXTI_Line8;
+	EXTI_Init(&EXTI_InitStructure);
+
+	// priority : lowest
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);	
+	
+	NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_Init(&NVIC_InitStructure);
+	
+	private_sonar_initialized = true;
 }
 
 void sonar_config(void)
 {
-	sonar_config_hc_sr04();
+	sonar_config_private();
 	valid_data = 0;
 
 	GPIO_InitTypeDef GPIO_InitStructure;

@@ -250,6 +250,8 @@ int main(void)
 		LEDOn(LED_ERR);
 		while (1);
 	}
+	NVIC_SetPriority(SysTick_IRQn, 0x0);
+
 
 	/* init usb */
 	USBD_Init(	&USB_OTG_dev,
@@ -265,7 +267,7 @@ int main(void)
 	enable_image_capture();
 
 	/* gyro config */
-	gyro_config();
+	//gyro_config();
 
 	/* init and clear fast image buffers */
 	for (int i = 0; i < global_data.param[PARAM_IMAGE_WIDTH] * global_data.param[PARAM_IMAGE_HEIGHT]; i++)
@@ -377,9 +379,9 @@ int main(void)
 		uint16_t image_size = global_data.param[PARAM_IMAGE_WIDTH] * global_data.param[PARAM_IMAGE_HEIGHT];
 
 		/* new gyroscope data */
-		float x_rate_sensor, y_rate_sensor, z_rate_sensor;
-		int16_t gyro_temp;
-		gyro_read(&x_rate_sensor, &y_rate_sensor, &z_rate_sensor,&gyro_temp);
+		float x_rate_sensor=0, y_rate_sensor=0, z_rate_sensor=0;
+		int16_t gyro_temp=0;
+		//gyro_read(&x_rate_sensor, &y_rate_sensor, &z_rate_sensor,&gyro_temp);
 
 		/* gyroscope coordinate transformation */
 		float x_rate = y_rate_sensor; // change x and y rates
@@ -675,4 +677,21 @@ int main(void)
 			LEDOff(LED_COM);
 		}
 	}
+}
+
+struct __FILE { int handle; /* Add whatever you need here */ };
+#define ITM_Port8(n)    (*((volatile unsigned char *)(0xE0000000+4*n)))
+#define ITM_Port16(n)   (*((volatile unsigned short*)(0xE0000000+4*n)))
+#define ITM_Port32(n)   (*((volatile unsigned long *)(0xE0000000+4*n)))
+#define DEMCR           (*((volatile unsigned long *)(0xE000EDFC)))
+#define TRCENA          0x01000000
+
+int fputc(int ch, FILE *f)
+{
+	if (DEMCR & TRCENA) 
+	{
+		while (ITM_Port32(0) == 0);
+		ITM_Port8(0) = ch;
+	}
+	return (ch);
 }
