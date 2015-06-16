@@ -146,6 +146,7 @@ void sonar_trigger(){
 	if (private_sonar_initialized)
 	{
 		GPIO_ResetBits(GPIOD, GPIO_Pin_14);	// pull down comparator modifier
+		reset_timer();
 		
 		GPIO_SetBits(GPIOB, GPIO_Pin_12);
 		delay_private();
@@ -182,7 +183,6 @@ void sonar_trigger(){
 		
 		GPIO_SetBits(GPIOD, GPIO_Pin_14);	// release comparator modifier
 		
-		reset_timer();
 	}
 }
 
@@ -286,6 +286,11 @@ bool sonar_read(float* sonar_value_filtered, float* sonar_value_raw)
 		trigger_time = 0;
 	}
 	
+	if (private_sonar_initialized && timeout && isnan(distance))
+	{
+		sonar_valid = false;
+	}
+	
 	/* getting new data with only around 10Hz */
 	if (new_value) {
 		sonar_filter();
@@ -370,28 +375,28 @@ void EXTI9_5_IRQHandler(void)
 		volatile int t = TIM5->CNT;
 		
 		if (t > DEADBAND && !timeout)
-	{
-		//
-		if (t-last_pulse_time > PULSE_TIMEOUT)
 		{
-			pulse_counter = 0;
-			first_pulse_time = t;
-		}
-		else
-		{
-			pulse_counter ++;
-		}
-		
-		if (pulse_counter >= MIN_PULSE_COUNT)
-		{
-			distance = first_pulse_time*0.000001 * 340/2;
-			printf("%f\n", distance);
-			take_mesaure(distance);
-			timeout = true;
-		}
+			//
+			if (t-last_pulse_time > PULSE_TIMEOUT)
+			{
+				pulse_counter = 0;
+				first_pulse_time = t;
+			}
+			else
+			{
+				pulse_counter ++;
+			}
 			
-		last_pulse_time = t;
-	}
+			if (pulse_counter >= MIN_PULSE_COUNT)
+			{
+				distance = first_pulse_time*0.000001f * 340/2;
+				printf("%f\n", distance);
+				take_mesaure(distance);
+				timeout = true;
+			}
+				
+			last_pulse_time = t;
+		}
 	}
 
 	EXTI_ClearITPendingBit(EXTI_Line8);
