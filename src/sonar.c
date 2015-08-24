@@ -101,7 +101,7 @@ float distance = NAN;
 
 #define DEADBAND 0
 #define PULSE_TIMEOUT 50
-#define MIN_PULSE_COUNT 4
+#define MIN_PULSE_COUNT 8
 
 inline void delay_private()
 {
@@ -145,43 +145,43 @@ void sonar_trigger(){
 	
 	if (private_sonar_initialized)
 	{
-		GPIO_ResetBits(GPIOD, GPIO_Pin_14);	// pull down comparator modifier
+		GPIO_ResetBits(GPIOA, GPIO_Pin_0);	// pull down comparator modifier
 		reset_timer();
 		
-		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		GPIO_SetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		GPIO_ResetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		GPIO_SetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		GPIO_ResetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		GPIO_SetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		GPIO_ResetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		GPIO_SetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		GPIO_ResetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		GPIO_SetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		GPIO_ResetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		GPIO_SetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		GPIO_ResetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		GPIO_SetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		GPIO_ResetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+		GPIO_SetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
-		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		GPIO_ResetBits(GPIOC, GPIO_Pin_4);
 		delay_private();
 		
-		GPIO_SetBits(GPIOD, GPIO_Pin_14);	// release comparator modifier
+		GPIO_SetBits(GPIOA, GPIO_Pin_0);	// release comparator modifier
 		
 	}
 }
@@ -316,13 +316,47 @@ void take_mesaure(float measure)
 	sonar_measure_time_interrupt = measure_time;
 	dt = ((float)(measure_time - last_measure_time)) / 1000000.0f;
 	
-	printf("R%f\n", measure);
+	//printf("R%f\n", measure);
 
 	valid_data = measure*1000;
 	sonar_mode = insert_sonar_value_and_get_mode_value(measure);
 	new_value = 1;
 	sonar_valid = true;
 	trigger_time = 0;
+}
+
+void EXTI1_IRQHandler(void)
+{
+	if (private_sonar_initialized)
+	{
+		volatile int t = TIM5->CNT;
+		
+		if (t > DEADBAND && !timeout)
+		{
+			//
+			if (t-last_pulse_time > PULSE_TIMEOUT)
+			{
+				pulse_counter = 0;
+				first_pulse_time = t;
+			}
+			else
+			{
+				pulse_counter ++;
+			}
+			
+			if (pulse_counter >= MIN_PULSE_COUNT)
+			{
+				distance = first_pulse_time*0.000001f * 340/2;
+				printf("%f\n", distance);
+				take_mesaure(distance);
+				timeout = true;
+			}
+				
+			last_pulse_time = t;
+		}
+	}
+	
+	EXTI_ClearITPendingBit(EXTI_Line1);
 }
 
 void EXTI9_5_IRQHandler(void)
@@ -370,34 +404,7 @@ void EXTI9_5_IRQHandler(void)
 		}
 	}
 	
-	if (private_sonar_initialized)
-	{
-		volatile int t = TIM5->CNT;
-		
-		if (t > DEADBAND && !timeout)
-		{
-			//
-			if (t-last_pulse_time > PULSE_TIMEOUT)
-			{
-				pulse_counter = 0;
-				first_pulse_time = t;
-			}
-			else
-			{
-				pulse_counter ++;
-			}
-			
-			if (pulse_counter >= MIN_PULSE_COUNT)
-			{
-				distance = first_pulse_time*0.000001f * 340/2;
-				printf("%f\n", distance);
-				take_mesaure(distance);
-				timeout = true;
-			}
-				
-			last_pulse_time = t;
-		}
-	}
+
 
 	EXTI_ClearITPendingBit(EXTI_Line8);
 }
@@ -493,49 +500,49 @@ void sonar_config_private()
 	TIM_Cmd(TIM5, ENABLE);
 	TIM_ITConfig(TIM5,TIM_IT_Update,ENABLE);
 
-	// D14 as comparator modifier
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-	GPIO_ResetBits(GPIOD, GPIO_Pin_14);
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_14;
+	// A0 as comparator modifier
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	GPIO_ResetBits(GPIOA, GPIO_Pin_0);
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_0;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOD, &GPIO_InitStructure);
-	GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_ResetBits(GPIOA, GPIO_Pin_0);
 	
-	// B12 as sender
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-	GPIO_ResetBits(GPIOB, GPIO_Pin_12);
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_12;
+	// C4 as sender
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	GPIO_ResetBits(GPIOC, GPIO_Pin_4);
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_4;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	GPIO_ResetBits(GPIOC, GPIO_Pin_4);
 	
-	// A8 as echo
+	// A1 as echo
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8;
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_1;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	// EXTI
-	EXTI_ClearITPendingBit(EXTI_Line8);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource8);
+	EXTI_ClearITPendingBit(EXTI_Line1);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource1);
 
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	EXTI_InitStructure.EXTI_Line = EXTI_Line8;
+	EXTI_InitStructure.EXTI_Line = EXTI_Line1;
 	EXTI_Init(&EXTI_InitStructure);
 
 	// priority : lowest
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;

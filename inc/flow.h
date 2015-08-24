@@ -41,5 +41,7 @@
  */
 uint8_t compute_flow(uint8_t *image1, uint8_t *image2, float x_rate, float y_rate, float z_rate,
 		float *histflowx, float *histflowy);
+uint8_t compute_klt(uint8_t *image1, uint8_t *image2, float x_rate, float y_rate, float z_rate,
+		float *histflowx, float *histflowy);
 
 #endif /* FLOW_H_ */

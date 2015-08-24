@@ -126,8 +126,8 @@ void mt9v034_context_configuration(void)
 	if(global_data.param[PARAM_IMAGE_LOW_LIGHT])
 	{
 		min_exposure = 0x0001;
-		max_exposure = 0x0100;
-		desired_brightness = 31; // VALID RANGE: 8-64
+		max_exposure = 0x0500;
+		desired_brightness = 58; // VALID RANGE: 8-64
 		resolution_ctrl = 0x0202;//10 bit linear
 		hdr_enabled = 0x0000; // off
 		aec_agc_enabled = 0x0303; // on
@@ -164,6 +164,7 @@ void mt9v034_context_configuration(void)
 		test_data = 0x0000;
 
 	uint16_t version = mt9v034_ReadReg16(MTV_CHIP_VERSION_REG);
+	uint16_t cfa = mt9v034_ReadReg16(0x6b);
 
 	if (version == 0x1324)
 	{

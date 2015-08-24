@@ -249,6 +249,7 @@ void dma_copy_image_buffers(uint8_t ** current_image, uint8_t ** previous_image,
 
 	/* time between images */
 	time_between_images = time_between_next_images;
+	//printf("time:%d  \n", time_between_images);
 
 	/* copy image */
 	if (dcmi_image_buffer_unused == 1)

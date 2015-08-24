@@ -156,7 +156,13 @@ void I2C1_EV_IRQHandler(void) {
 	static uint8_t txDataIndex1 = 0x00;
 	static uint8_t txDataIndex2 = 0x00;
 	static uint8_t rxDataIndex = 0x00;
-	switch (I2C_GetLastEvent(I2C1 )) {
+	uint32_t i2c_event = I2C_GetLastEvent(I2C1 );
+	switch (i2c_event) {
+		
+	case 0x600C0:
+		volatile uint32_t temp = I2C1->DR;
+		I2C1 ->SR1 = 0x80;
+		break;
 
 	case I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED : {
 		I2C1 ->SR1;
