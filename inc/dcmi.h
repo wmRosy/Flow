@@ -35,7 +35,7 @@
 #define DCMI_H_
 
 #include <stdint.h>
-#include "mt9v034.h"
+#include "ov7675.h"
 
 #define DCMI_DR_ADDRESS       0x50050028
 

@@ -41,8 +41,8 @@
 #include "misc.h"
 #include "settings.h"
 
-#define TXBUFFERSIZE   	(64*64) // 4 KByte
-#define RXBUFFERSIZE   	(64*64)
+#define TXBUFFERSIZE   	(128) // 4 KByte
+#define RXBUFFERSIZE   	(128)
 
 /* prototypes */
 uint8_t usart2_tx_ringbuffer_push(const uint8_t* ch, uint8_t len);
@@ -60,9 +60,9 @@ void USART3_IRQHandler(void);
 void usart_init(void);
 
 /* fill output buffers with some asciis to start with */
-uint8_t usart2_tx_buffer[TXBUFFERSIZE] = "\n\r    ____ _  ____ __  ________    ____ _       __\n\r   / __ \\ |/ / // / / ____/ /   / __ \\ |     / /\n\r  / /_/ /   / // /_/ /_  / /   / / / / | /| / / \n\r / ____/   /__  __/ __/ / /___/ /_/ /| |/ |/ /  \n\r/_/   /_/|_| /_/ /_/   /_____/\\____/ |__/|__/   \n\r                                                \n\r";
+uint8_t usart2_tx_buffer[TXBUFFERSIZE] = {0};//"\n\r    ____ _  ____ __  ________    ____ _       __\n\r   / __ \\ |/ / // / / ____/ /   / __ \\ |     / /\n\r  / /_/ /   / // /_/ /_  / /   / / / / | /| / / \n\r / ____/   /__  __/ __/ / /___/ /_/ /| |/ |/ /  \n\r/_/   /_/|_| /_/ /_/   /_____/\\____/ |__/|__/   \n\r                                                \n\r";
 uint8_t usart2_rx_buffer[RXBUFFERSIZE] = "";
-uint8_t usart3_tx_buffer[TXBUFFERSIZE] = "\n\r    ____ _  ____ __  ________    ____ _       __\n\r   / __ \\ |/ / // / / ____/ /   / __ \\ |     / /\n\r  / /_/ /   / // /_/ /_  / /   / / / / | /| / / \n\r / ____/   /__  __/ __/ / /___/ /_/ /| |/ |/ /  \n\r/_/   /_/|_| /_/ /_/   /_____/\\____/ |__/|__/   \n\r                                                \n\r";
+uint8_t usart3_tx_buffer[TXBUFFERSIZE] = {0};//"\n\r    ____ _  ____ __  ________    ____ _       __\n\r   / __ \\ |/ / // / / ____/ /   / __ \\ |     / /\n\r  / /_/ /   / // /_/ /_  / /   / / / / | /| / / \n\r / ____/   /__  __/ __/ / /___/ /_/ /| |/ |/ /  \n\r/_/   /_/|_| /_/ /_/   /_____/\\____/ |__/|__/   \n\r                                                \n\r";
 uint8_t usart3_rx_buffer[RXBUFFERSIZE] = "";
 
 int usart2_tx_counter_read = 0;

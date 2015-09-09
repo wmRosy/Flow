@@ -12,16 +12,16 @@
       <ToolsetName>ARM-ADS</ToolsetName>
       <TargetOption>
         <TargetCommonOption>
-          <Device>STM32F407VE</Device>
+          <Device>STM32F427VGTx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.1.0.8</PackID>
+          <PackID>Keil.STM32F4xx_DFP.2.3.0</PackID>
           <PackURL>http://www.keil.com/pack</PackURL>
-          <Cpu>IROM(0x08000000,0x80000) IRAM(0x20000000,0x20000) IRAM2(0x10000000,0x10000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
+          <Cpu>IROM(0x08000000,0x100000) IRAM(0x20000000,0x30000) IRAM2(0x10000000,0x10000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_1024 -FS08000000 -FL0100000 -FP0($$Device:STM32F407VE$Flash\STM32F4xx_1024.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_1024 -FS08000000 -FL0100000 -FP0($$Device:STM32F427VGTx$CMSIS\Flash\STM32F4xx_1024.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:STM32F407VE$Device\Include\stm32f4xx.h</RegisterFile>
+          <RegisterFile>$$Device:STM32F427VGTx$Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -31,7 +31,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:STM32F407VE$SVD\STM32F40x.svd</SFDFile>
+          <SFDFile>$$Device:STM32F427VGTx$CMSIS\SVD\STM32F427x.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -84,8 +84,6 @@
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
-            <nStopA1X>0</nStopA1X>
-            <nStopA2X>0</nStopA2X>
           </AfterMake>
           <SelectedForBatchBuild>0</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
@@ -282,12 +280,12 @@
               <IRAM>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x20000</Size>
+                <Size>0x30000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x80000</Size>
+                <Size>0x100000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -312,7 +310,7 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x80000</Size>
+                <Size>0x100000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -337,7 +335,7 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x20000</Size>
+                <Size>0x30000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
@@ -363,8 +361,6 @@
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
             <useXO>0</useXO>
-            <v6Lang>0</v6Lang>
-            <v6LangP>0</v6LangP>
             <VariousControls>
               <MiscControls>--gnu --diag_suppress 177,550,1,191</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F429_439xx,USE_STM324x9I_EVAL,STM32F4,__FPU_USED=1,HSE_VALUE=8000000</Define>
@@ -453,11 +449,6 @@
               <FilePath>.\src\main.c</FilePath>
             </File>
             <File>
-              <FileName>mt9v034.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\mt9v034.c</FilePath>
-            </File>
-            <File>
               <FileName>reset.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\reset.c</FilePath>
@@ -521,6 +512,11 @@
               <FileName>startup_stm32f429_439xx.S</FileName>
               <FileType>2</FileType>
               <FilePath>.\lib\startup_stm32f429_439xx.S</FilePath>
+            </File>
+            <File>
+              <FileName>ov7675.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\ov7675.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -707,8 +703,6 @@
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
-            <nStopA1X>0</nStopA1X>
-            <nStopA2X>0</nStopA2X>
           </AfterMake>
           <SelectedForBatchBuild>0</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
@@ -986,8 +980,6 @@
             <uSurpInc>0</uSurpInc>
             <uC99>0</uC99>
             <useXO>0</useXO>
-            <v6Lang>0</v6Lang>
-            <v6LangP>0</v6LangP>
             <VariousControls>
               <MiscControls>--C99</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F427_437xx,USE_STM324x7I_EVAL,</Define>
@@ -1076,11 +1068,6 @@
               <FilePath>.\src\main.c</FilePath>
             </File>
             <File>
-              <FileName>mt9v034.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\mt9v034.c</FilePath>
-            </File>
-            <File>
               <FileName>reset.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\reset.c</FilePath>
@@ -1144,6 +1131,11 @@
               <FileName>startup_stm32f429_439xx.S</FileName>
               <FileType>2</FileType>
               <FilePath>.\lib\startup_stm32f429_439xx.S</FilePath>
+            </File>
+            <File>
+              <FileName>ov7675.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\ov7675.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1330,8 +1322,6 @@
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
-            <nStopA1X>0</nStopA1X>
-            <nStopA2X>0</nStopA2X>
           </AfterMake>
           <SelectedForBatchBuild>0</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
@@ -1609,8 +1599,6 @@
             <uSurpInc>0</uSurpInc>
             <uC99>0</uC99>
             <useXO>0</useXO>
-            <v6Lang>0</v6Lang>
-            <v6LangP>0</v6LangP>
             <VariousControls>
               <MiscControls>--C99</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F40_41xxx,USE_STM324xG_EVAL,</Define>
@@ -1699,11 +1687,6 @@
               <FilePath>.\src\main.c</FilePath>
             </File>
             <File>
-              <FileName>mt9v034.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\mt9v034.c</FilePath>
-            </File>
-            <File>
               <FileName>reset.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\reset.c</FilePath>
@@ -1767,6 +1750,11 @@
               <FileName>startup_stm32f429_439xx.S</FileName>
               <FileType>2</FileType>
               <FilePath>.\lib\startup_stm32f429_439xx.S</FilePath>
+            </File>
+            <File>
+              <FileName>ov7675.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\ov7675.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1953,8 +1941,6 @@
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
-            <nStopA1X>0</nStopA1X>
-            <nStopA2X>0</nStopA2X>
           </AfterMake>
           <SelectedForBatchBuild>0</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
@@ -2232,8 +2218,6 @@
             <uSurpInc>0</uSurpInc>
             <uC99>0</uC99>
             <useXO>0</useXO>
-            <v6Lang>0</v6Lang>
-            <v6LangP>0</v6LangP>
             <VariousControls>
               <MiscControls>--C99</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F401xx,</Define>
@@ -2322,11 +2306,6 @@
               <FilePath>.\src\main.c</FilePath>
             </File>
             <File>
-              <FileName>mt9v034.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\mt9v034.c</FilePath>
-            </File>
-            <File>
               <FileName>reset.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\reset.c</FilePath>
@@ -2390,6 +2369,11 @@
               <FileName>startup_stm32f429_439xx.S</FileName>
               <FileType>2</FileType>
               <FilePath>.\lib\startup_stm32f429_439xx.S</FilePath>
+            </File>
+            <File>
+              <FileName>ov7675.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\ov7675.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -80,7 +80,7 @@ void i2c_init() {
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	//RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
 	gpio_init.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
 	gpio_init.GPIO_Mode = GPIO_Mode_AF;
@@ -91,13 +91,13 @@ void i2c_init() {
 	gpio_init.GPIO_OType = GPIO_OType_OD;
 	GPIO_Init(GPIOB, &gpio_init);
 
-	GPIO_InitTypeDef gpio_init2;
+//	GPIO_InitTypeDef gpio_init2;
 
-	gpio_init2.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
-	gpio_init2.GPIO_Mode = GPIO_Mode_IN;
-	gpio_init2.GPIO_Speed = GPIO_Speed_50MHz;
-	gpio_init2.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_Init(GPIOC, &gpio_init2);
+//	gpio_init2.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+//	gpio_init2.GPIO_Mode = GPIO_Mode_IN;
+//	gpio_init2.GPIO_Speed = GPIO_Speed_50MHz;
+//	gpio_init2.GPIO_PuPd = GPIO_PuPd_UP;
+//	GPIO_Init(GPIOC, &gpio_init2);
 
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource8, GPIO_AF_I2C1 ); // SCL
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource9, GPIO_AF_I2C1 ); // SDA

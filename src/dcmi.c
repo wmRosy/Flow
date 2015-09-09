@@ -47,6 +47,7 @@
 #include "stm32f4xx_tim.h"
 #include "misc.h"
 #include "stm32f4xx.h"
+#include "ov7675.h"
 
 /* counters */
 volatile uint8_t image_counter = 0;
@@ -66,9 +67,9 @@ volatile uint8_t calibration_mem0;
 volatile uint8_t calibration_mem1;
 
 /* image buffers */
-uint8_t dcmi_image_buffer_8bit_1[FULL_IMAGE_SIZE];
-uint8_t dcmi_image_buffer_8bit_2[FULL_IMAGE_SIZE];
-uint8_t dcmi_image_buffer_8bit_3[FULL_IMAGE_SIZE];
+uint8_t dcmi_image_buffer_8bit_1[FULL_IMAGE_SIZE*2];
+uint8_t dcmi_image_buffer_8bit_2[FULL_IMAGE_SIZE*2];
+uint8_t dcmi_image_buffer_8bit_3[FULL_IMAGE_SIZE*2];
 
 uint32_t time_between_images;
 
@@ -83,9 +84,10 @@ void enable_image_capture(void)
 {
 	dcmi_clock_init();
 	dcmi_hw_init();
-	dcmi_dma_init(global_data.param[PARAM_IMAGE_WIDTH] * global_data.param[PARAM_IMAGE_HEIGHT]);
-	mt9v034_context_configuration();
+	dcmi_dma_init(FULL_IMAGE_SIZE*2);
+	ov7675_context_configuration();
 	dcmi_dma_enable();
+	dcmi_it_init();
 }
 
 /**
@@ -132,10 +134,12 @@ void DCMI_IRQHandler(void)
  */
 void DMA2_Stream1_IRQHandler(void)
 {
+	static u8 half_frame;
 	/* transfer completed */
 	if (DMA_GetITStatus(DMA2_Stream1, DMA_IT_TCIF1) != RESET)
 	{
 		DMA_ClearITPendingBit(DMA2_Stream1, DMA_IT_TCIF1);
+		half_frame++;
 		frame_counter++;
 
 		if(global_data.param[PARAM_VIDEO_ONLY])
@@ -149,7 +153,7 @@ void DMA2_Stream1_IRQHandler(void)
 				calibration_mem1 = dcmi_image_buffer_memory1;
 			}
 		}
-
+		dma_swap_buffers();
 		return;
 	}
 
@@ -163,7 +167,6 @@ void DMA2_Stream1_IRQHandler(void)
 		DMA_ClearITPendingBit(DMA2_Stream1, DMA_IT_HTIF1);
 	}
 
-	dma_swap_buffers();
 }
 
 /**
@@ -254,18 +257,18 @@ void dma_copy_image_buffers(uint8_t ** current_image, uint8_t ** previous_image,
 	/* copy image */
 	if (dcmi_image_buffer_unused == 1)
 	{
-		for (uint16_t pixel = 0; pixel < image_size; pixel++)
-			(*current_image)[pixel] = (uint8_t)(dcmi_image_buffer_8bit_1[pixel]);
+		for (uint16_t pixel = 0; pixel < FULL_IMAGE_SIZE; pixel++)
+			(*current_image)[pixel] = (uint8_t)(dcmi_image_buffer_8bit_1[2*pixel-1]);
 	}
 	else if (dcmi_image_buffer_unused == 2)
 	{
-		for (uint16_t pixel = 0; pixel < image_size; pixel++)
-			(*current_image)[pixel] = (uint8_t)(dcmi_image_buffer_8bit_2[pixel]);
+		for (uint16_t pixel = 0; pixel < FULL_IMAGE_SIZE; pixel++)
+			(*current_image)[pixel] = (uint8_t)(dcmi_image_buffer_8bit_2[2*pixel-1]);
 	}
 	else
 	{
-		for (uint16_t pixel = 0; pixel < image_size; pixel++)
-			(*current_image)[pixel] = (uint8_t)(dcmi_image_buffer_8bit_3[pixel]);
+		for (uint16_t pixel = 0; pixel < FULL_IMAGE_SIZE; pixel++)
+			(*current_image)[pixel] = (uint8_t)(dcmi_image_buffer_8bit_3[2*pixel-1]);
 	}
 }
 
@@ -414,63 +417,95 @@ void reset_frame_counter()
 {
 	frame_counter = 0;
 }
+void MCO1_Init(void)
+{
+ GPIO_InitTypeDef GPIO_InitStructure;
 
+ RCC_ClockSecuritySystemCmd(ENABLE);
+
+ /* Enable GPIOs clocks */
+ RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+ 
+ GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_MCO);
+  
+ /* Configure MCO (PA8) */
+ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+ GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+ GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+ GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+ GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;  
+ GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+ RCC_MCO1Config(RCC_MCO1Source_HSE, RCC_MCO1Div_1);
+}
+void Disable_PA2()
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	/* GPIOC Configuration:  TIM5 CH3 (PA2)  */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN ;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_PuPd =  GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+}
 /**
  * @brief HW initialization of DCMI clock
  */
 void dcmi_clock_init()
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	TIM_OCInitTypeDef TIM_OCInitStructure;
+//	GPIO_InitTypeDef GPIO_InitStructure;
+//	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+//	TIM_OCInitTypeDef TIM_OCInitStructure;
 
-	/* TIM3 clock enable */
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+//	/* TIM5 clock enable */
+//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
 
-	/* GPIOC clock enable */
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+//	/* GPIOA clock enable */
+//	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
-	/* GPIOC Configuration:  TIM3 CH3 (PC8)  */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
+//	/* GPIOC Configuration:  TIM5 CH3 (PA2)  */
+//	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+//	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+//	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+//	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	/* Connect TIM3 pins to AF2 */;
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource8, GPIO_AF_TIM3);
+//	/* Connect TIM3 pins to AF2 */;
+//	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_TIM5);
 
-	/* Time base configuration */
-	TIM_TimeBaseStructure.TIM_Period = 3;
-	TIM_TimeBaseStructure.TIM_Prescaler = 0;
-	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+//	/* Time base configuration */
+//	TIM_TimeBaseStructure.TIM_Period = 20;
+//	TIM_TimeBaseStructure.TIM_Prescaler = 0;
+//	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+//	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
-	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
+//	TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
 
-	/* PWM1 Mode configuration: Channel3 */
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 2;// TIM_TimeBaseStructure.TIM_Period/2;
+//	/* PWM1 Mode configuration: Channel3 */
+//	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+//	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+//	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+//	TIM_OCInitStructure.TIM_Pulse = 10;// TIM_TimeBaseStructure.TIM_Period/2;
 
-	TIM_OC3Init(TIM3, &TIM_OCInitStructure);
+//	TIM_OC3Init(TIM5, &TIM_OCInitStructure);
 
-	TIM_OC3PreloadConfig(TIM3, TIM_OCPreload_Enable);
+//	TIM_OC3PreloadConfig(TIM5, TIM_OCPreload_Enable);
 
-	TIM_ARRPreloadConfig(TIM3, ENABLE);
+//	TIM_ARRPreloadConfig(TIM5, ENABLE);
 
-	/* TIM3 enable counter */
-	TIM_Cmd(TIM3, ENABLE);
+//	/* TIM3 enable counter */
+//	TIM_Cmd(TIM5, ENABLE);
+	Disable_PA2();
+	MCO1_Init();
+	
 }
-
 /**
  * @brief HW initialization DCMI
  */
 void dcmi_hw_init(void)
 {
-	uint16_t image_size = global_data.param[PARAM_IMAGE_WIDTH] * global_data.param[PARAM_IMAGE_HEIGHT];
+	uint16_t image_size =FULL_IMAGE_SIZE*2; //global_data.param[PARAM_IMAGE_WIDTH] * global_data.param[PARAM_IMAGE_HEIGHT];
 
 	/* Reset image buffers */
 	for (int i = 0; i < image_size; i++) {
@@ -482,6 +517,7 @@ void dcmi_hw_init(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	I2C_InitTypeDef I2C_InitStruct;
 
+	
 	/*** Configures the DCMI GPIOs to interface with the OV2640 camera module ***/
 	/* Enable DCMI GPIOs clocks */
 	RCC_AHB1PeriphClockCmd(
@@ -498,8 +534,8 @@ void dcmi_hw_init(void)
 	GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_DCMI); //DCMI_D0
 	GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_DCMI); //DCMI_D1
 
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_DCMI); //DCMI_D8
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource12, GPIO_AF_DCMI); //DCMI_D9
+//	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_DCMI); //DCMI_D8
+//	GPIO_PinAFConfig(GPIOC, GPIO_PinSource12, GPIO_AF_DCMI); //DCMI_D9
 
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource0, GPIO_AF_DCMI); //DCMI_D2
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource1, GPIO_AF_DCMI); //DCMI_D3
@@ -518,7 +554,7 @@ void dcmi_hw_init(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_10 | GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;// | GPIO_Pin_10 | GPIO_Pin_12;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4
@@ -561,13 +597,13 @@ void dcmi_hw_init(void)
 	I2C_Init(I2C2, &I2C_InitStruct);
 
 	/* Initialize GPIOs for EXPOSURE and STANDBY lines of the camera */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	GPIO_ResetBits(GPIOA, GPIO_Pin_2 | GPIO_Pin_3);
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	GPIO_ResetBits(GPIOC, GPIO_Pin_13);
 }
 
 /**
@@ -587,10 +623,10 @@ void dcmi_dma_init(uint16_t buffer_size)
 	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_DCMI, ENABLE);
 
 	/* DCMI configuration */
-	DCMI_InitStructure.DCMI_CaptureMode = DCMI_CaptureMode_Continuous;
+	DCMI_InitStructure.DCMI_CaptureMode = DCMI_CaptureMode_Continuous ;
 	DCMI_InitStructure.DCMI_SynchroMode = DCMI_SynchroMode_Hardware;
-	DCMI_InitStructure.DCMI_PCKPolarity = DCMI_PCKPolarity_Falling;
-	DCMI_InitStructure.DCMI_VSPolarity = DCMI_VSPolarity_Low;
+	DCMI_InitStructure.DCMI_PCKPolarity = DCMI_PCKPolarity_Rising;
+	DCMI_InitStructure.DCMI_VSPolarity = DCMI_VSPolarity_High;//DCMI_VSPolarity_Low;
 	DCMI_InitStructure.DCMI_HSPolarity = DCMI_HSPolarity_Low;
 	DCMI_InitStructure.DCMI_CaptureRate = DCMI_CaptureRate_All_Frame;
 	DCMI_InitStructure.DCMI_ExtendedDataMode = DCMI_ExtendedDataMode_8b;
