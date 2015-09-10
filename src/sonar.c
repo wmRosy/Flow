@@ -359,55 +359,55 @@ void EXTI1_IRQHandler(void)
 	EXTI_ClearITPendingBit(EXTI_Line1);
 }
 
-//void EXTI9_5_IRQHandler(void)
-//{
-//	// ignore any pulses if not triggered by caller
-//	if (sr04_initialized && trigger_time > 0)
-//	{
-//		volatile int time = TIM6->CNT;
-//		if(GPIOA->IDR & GPIO_Pin_8)
-//			rising_time = time;
-//		else if (rising_time > 0)
-//		{
-//			volatile int delta_time = time - rising_time;
-//			if (delta_time < 0)
-//				delta_time += 60000;
-//			int temp = delta_time * SOUND_SPEED/2;
-//			if (temp <= SONAR_MAX_SR04 && temp >= SONAR_MIN_SR04)
-//			{
-//				/* it is in normal sensor range, take it */
-//				last_measure_time = measure_time;
-//				measure_time = get_boot_time_us();
-//				sonar_measure_time_interrupt = measure_time;
-//				dt = ((float)(measure_time - last_measure_time)) / 1000000.0f;
-//				
-//				printf("R%d\n", temp);
+void EXTI9_5_IRQHandler(void)
+{
+	// ignore any pulses if not triggered by caller
+	if (sr04_initialized && trigger_time > 0)
+	{
+		volatile int time = TIM6->CNT;
+		if(GPIOA->IDR & GPIO_Pin_8)
+			rising_time = time;
+		else if (rising_time > 0)
+		{
+			volatile int delta_time = time - rising_time;
+			if (delta_time < 0)
+				delta_time += 60000;
+			int temp = delta_time * SOUND_SPEED/2;
+			if (temp <= SONAR_MAX_SR04 && temp >= SONAR_MIN_SR04)
+			{
+				/* it is in normal sensor range, take it */
+				last_measure_time = measure_time;
+				measure_time = get_boot_time_us();
+				sonar_measure_time_interrupt = measure_time;
+				dt = ((float)(measure_time - last_measure_time)) / 1000000.0f;
+				
+				printf("R%d\n", temp);
 
-//				valid_data = temp;
-//				sonar_mode = insert_sonar_value_and_get_mode_value(valid_data / SONAR_SCALE);
-//				new_value = 1;
-//				sonar_valid = true;
-//				trigger_time = 0;
-//			}
-//			else
-//			{
-//				printf("R-1\n");
-//				sonar_valid = false;
-//			}
-//			rising_time = -1;
-//		}
-//		else
-//		{
-//			sonar_valid = false;
-//			rising_time = -1;	// no corresponding rising edge.
-//			trigger_time = -1;
-//		}
-//	}
-//	
+				valid_data = temp;
+				sonar_mode = insert_sonar_value_and_get_mode_value(valid_data / SONAR_SCALE);
+				new_value = 1;
+				sonar_valid = true;
+				trigger_time = 0;
+			}
+			else
+			{
+				printf("R-1\n");
+				sonar_valid = false;
+			}
+			rising_time = -1;
+		}
+		else
+		{
+			sonar_valid = false;
+			rising_time = -1;	// no corresponding rising edge.
+			trigger_time = -1;
+		}
+	}
+	
 
 
-//	EXTI_ClearITPendingBit(EXTI_Line8);
-//}
+	EXTI_ClearITPendingBit(EXTI_Line8);
+}
 
 void TIM5_IRQHandler(void)
 {
