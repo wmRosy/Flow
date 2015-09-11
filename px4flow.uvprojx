@@ -12,16 +12,16 @@
       <ToolsetName>ARM-ADS</ToolsetName>
       <TargetOption>
         <TargetCommonOption>
-          <Device>STM32F407VE</Device>
+          <Device>STM32F427VG</Device>
           <Vendor>STMicroelectronics</Vendor>
           <PackID>Keil.STM32F4xx_DFP.1.0.8</PackID>
           <PackURL>http://www.keil.com/pack</PackURL>
-          <Cpu>IROM(0x08000000,0x80000) IRAM(0x20000000,0x20000) IRAM2(0x10000000,0x10000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
+          <Cpu>IROM(0x08000000,0x100000) IRAM(0x20000000,0x30000) IRAM2(0x10000000,0x10000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_1024 -FS08000000 -FL0100000 -FP0($$Device:STM32F407VE$Flash\STM32F4xx_1024.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_1024 -FS08000000 -FL0100000 -FP0($$Device:STM32F427VG$Flash\STM32F4xx_1024.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:STM32F407VE$Device\Include\stm32f4xx.h</RegisterFile>
+          <RegisterFile>$$Device:STM32F427VG$Device\Include\stm32f4xx.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -31,7 +31,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:STM32F407VE$SVD\STM32F40x.svd</SFDFile>
+          <SFDFile>$$Device:STM32F427VG$SVD\STM32F427x.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -50,7 +50,7 @@
           <OutputName>pilotF4</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\output\</ListingPath>
@@ -282,12 +282,12 @@
               <IRAM>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x20000</Size>
+                <Size>0x30000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x80000</Size>
+                <Size>0x100000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -312,7 +312,7 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x80000</Size>
+                <Size>0x100000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -337,7 +337,7 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x20000</Size>
+                <Size>0x30000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
@@ -349,8 +349,8 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
-            <oTime>1</oTime>
+            <Optim>1</Optim>
+            <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
             <Strict>0</Strict>
@@ -521,6 +521,11 @@
               <FileName>startup_stm32f429_439xx.S</FileName>
               <FileType>2</FileType>
               <FilePath>.\lib\startup_stm32f429_439xx.S</FilePath>
+            </File>
+            <File>
+              <FileName>testmain.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\testmain.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1145,6 +1150,11 @@
               <FileType>2</FileType>
               <FilePath>.\lib\startup_stm32f429_439xx.S</FilePath>
             </File>
+            <File>
+              <FileName>testmain.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\testmain.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1768,6 +1778,11 @@
               <FileType>2</FileType>
               <FilePath>.\lib\startup_stm32f429_439xx.S</FilePath>
             </File>
+            <File>
+              <FileName>testmain.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\testmain.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2390,6 +2405,11 @@
               <FileName>startup_stm32f429_439xx.S</FileName>
               <FileType>2</FileType>
               <FilePath>.\lib\startup_stm32f429_439xx.S</FilePath>
+            </File>
+            <File>
+              <FileName>testmain.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\testmain.c</FilePath>
             </File>
           </Files>
         </Group>

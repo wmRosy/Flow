@@ -496,13 +496,14 @@ int main(void)
 			//update I2C transmitbuffer
 			if(valid_frame_count>0)
 			{
+				extern uint16_t cmos_version;
 				update_TX_buffer(pixel_flow_x, pixel_flow_y, velocity_x_sum/valid_frame_count, velocity_y_sum/valid_frame_count, qual,
-						ground_distance, x_rate, y_rate, z_rate, gyro_temp);
+						ground_distance, cmos_version, y_rate, z_rate, gyro_temp);
 			}
 			else
 			{
 				update_TX_buffer(pixel_flow_x, pixel_flow_y, 0.0f, 0.0f, qual,
-						ground_distance, x_rate, y_rate, z_rate, gyro_temp);
+						ground_distance, cmos_version, y_rate, z_rate, gyro_temp);
 			}
 
             //serial mavlink  + usb mavlink output throttled
@@ -684,7 +685,7 @@ int main(void)
 	}
 }
 
-struct __FILE { int handle; /* Add whatever you need here */ };
+struct __FILE { int handle;  };
 #define ITM_Port8(n)    (*((volatile unsigned char *)(0xE0000000+4*n)))
 #define ITM_Port16(n)   (*((volatile unsigned short*)(0xE0000000+4*n)))
 #define ITM_Port32(n)   (*((volatile unsigned long *)(0xE0000000+4*n)))

@@ -248,7 +248,7 @@ void I2C1_ER_IRQHandler(void) {
 
 void update_TX_buffer(float pixel_flow_x, float pixel_flow_y,
 		float flow_comp_m_x, float flow_comp_m_y, uint8_t qual,
-		float ground_distance, float gyro_x_rate, float gyro_y_rate,
+		float ground_distance, uint16_t cmos_version, float gyro_y_rate,
 		float gyro_z_rate, int16_t gyro_temp) {
 	static uint16_t frame_count = 0;
 
@@ -263,7 +263,7 @@ void update_TX_buffer(float pixel_flow_x, float pixel_flow_y,
 	f.qual = qual;
 	f.ground_distance = ground_distance * 1000;
 
-	f.gyro_x_rate = gyro_x_rate * getGyroScalingFactor();
+	f.cmos_version = cmos_version;
 	f.gyro_y_rate = gyro_y_rate * getGyroScalingFactor();
 	f.gyro_z_rate = gyro_z_rate * getGyroScalingFactor();
 	f.gyro_range = getGyroRange();
@@ -322,9 +322,9 @@ void update_TX_buffer(float pixel_flow_x, float pixel_flow_y,
 		accumulated_flow_y += pixel_flow_x * 1000.0f / focal_length_px * -1.0f;	//mrad
 		accumulated_framecount++;
 		accumulated_quality += qual;
-		accumulated_gyro_x += gyro_x_rate * deltatime * 0.001f;	//mrad  gyro_x_rate * 1000.0f*deltatime/1000000.0f;
-		accumulated_gyro_y += gyro_y_rate * deltatime * 0.001f;	//mrad
-		accumulated_gyro_z += gyro_z_rate * deltatime * 0.001f;	//mrad
+		accumulated_gyro_x += 0 * deltatime * 0.001f;	//mrad  gyro_x_rate * 1000.0f*deltatime/1000000.0f;
+		accumulated_gyro_y += 0 * deltatime * 0.001f;	//mrad
+		accumulated_gyro_z += 0 * deltatime * 0.001f;	//mrad
 	}
 
 	//update lasttime

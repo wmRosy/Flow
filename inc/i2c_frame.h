@@ -51,7 +51,7 @@ typedef  struct i2c_frame
     int16_t flow_comp_m_x;
     int16_t flow_comp_m_y;
     int16_t qual;
-    int16_t gyro_x_rate;
+    uint16_t cmos_version;
     int16_t gyro_y_rate;
     int16_t gyro_z_rate;
     uint8_t gyro_range;

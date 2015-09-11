@@ -41,6 +41,8 @@
 #include "stm32f4xx_i2c.h"
 #include "mt9v034.h"
 
+uint16_t cmos_version = 0;
+
 /**
   * @brief  Configures the mt9v034 camera with two context (binning 4 and binning 2).
   */
@@ -118,7 +120,7 @@ void mt9v034_context_configuration(void)
 	uint16_t shutter_width_ctrl = 0x0164; // default from context A
 	uint16_t total_shutter_width = 0x01E0; // default from context A
 	uint16_t aec_update_freq = 0x02; // default Number of frames to skip between changes in AEC VALID RANGE: 0-15
-	uint16_t aec_low_pass = 0x01; // default VALID RANGE: 0-2
+	uint16_t aec_low_pass = 2; // default VALID RANGE: 0-2
 	uint16_t agc_update_freq = 0x02; // default Number of frames to skip between changes in AGC VALID RANGE: 0-15
 	uint16_t agc_low_pass = 0x02; // default VALID RANGE: 0-2
 
@@ -163,10 +165,10 @@ void mt9v034_context_configuration(void)
 	else
 		test_data = 0x0000;
 
-	uint16_t version = mt9v034_ReadReg16(MTV_CHIP_VERSION_REG);
+	cmos_version = mt9v034_ReadReg16(MTV_CHIP_VERSION_REG);
 	uint16_t cfa = mt9v034_ReadReg16(0x6b);
 
-	if (version == 0x1324)
+	if (cmos_version == 0x1324)
 	{
 		mt9v034_WriteReg16(MTV_CHIP_CONTROL_REG, new_control);
 
@@ -214,6 +216,8 @@ void mt9v034_context_configuration(void)
 		mt9v034_WriteReg16(MTV_AEC_LOWPASS_REG,aec_low_pass);
 		mt9v034_WriteReg16(MTV_AGC_UPDATE_REG,agc_update_freq);
 		mt9v034_WriteReg16(MTV_AGC_LOWPASS_REG,agc_low_pass);
+		
+		//mt9v034_WriteReg16(0x2C, 0);
 
 		/* Reset */
 		mt9v034_WriteReg16(MTV_SOFT_RESET_REG, 0x01);
