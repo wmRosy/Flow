@@ -365,7 +365,7 @@
               <MiscControls>--gnu --diag_suppress 177,550,1,191</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F429_439xx,USE_STM324x9I_EVAL,STM32F4,__FPU_USED=1,HSE_VALUE=8000000</Define>
               <Undefine></Undefine>
-              <IncludePath>.\inc;.\lib;.\lib\STM32F4xx_StdPeriph_Driver\inc;.\lib\STM32_USB_Device_Library\Class\cdc\inc;.\lib\STM32_USB_Device_Library\Core\inc;.\lib\STM32_USB_HOST_Library\Core\inc;.\lib\STM32_USB_OTG_Driver\inc;.\mavlink\include\mavlink\v1.0;.\mavlink\include\mavlink\v1.0\common</IncludePath>
+              <IncludePath>.\inc;.\lib;.\lib\STM32F4xx_StdPeriph_Driver\inc;.\lib\STM32_USB_Device_Library\Class\cdc\inc;.\lib\STM32_USB_Device_Library\Core\inc;.\lib\STM32_USB_HOST_Library\Core\inc;.\lib\STM32_USB_OTG_Driver\inc;.\mavlink\include\mavlink\v1.0;.\mavlink\include\mavlink\v1.0\common;.\src\fat</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -518,6 +518,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\ov7675.c</FilePath>
             </File>
+            <File>
+              <FileName>log.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\src\log.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -583,6 +588,11 @@
               <FileType>1</FileType>
               <FilePath>.\lib\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_syscfg.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f4xx_sdio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\lib\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_sdio.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -622,6 +632,31 @@
               <FileName>usbd_cdc_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\lib\STM32_USB_Device_Library\Class\cdc\src\usbd_cdc_core.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>fatfs</GroupName>
+          <Files>
+            <File>
+              <FileName>diskioF4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\diskioF4.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\ff.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm324xg_eval.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\stm324xg_eval.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm324xg_eval_sdio_sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\stm324xg_eval_sdio_sd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1137,6 +1172,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\ov7675.c</FilePath>
             </File>
+            <File>
+              <FileName>log.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\src\log.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1202,6 +1242,11 @@
               <FileType>1</FileType>
               <FilePath>.\lib\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_syscfg.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f4xx_sdio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\lib\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_sdio.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1241,6 +1286,31 @@
               <FileName>usbd_cdc_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\lib\STM32_USB_Device_Library\Class\cdc\src\usbd_cdc_core.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>fatfs</GroupName>
+          <Files>
+            <File>
+              <FileName>diskioF4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\diskioF4.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\ff.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm324xg_eval.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\stm324xg_eval.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm324xg_eval_sdio_sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\stm324xg_eval_sdio_sd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1756,6 +1826,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\ov7675.c</FilePath>
             </File>
+            <File>
+              <FileName>log.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\src\log.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1821,6 +1896,11 @@
               <FileType>1</FileType>
               <FilePath>.\lib\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_syscfg.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f4xx_sdio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\lib\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_sdio.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1860,6 +1940,31 @@
               <FileName>usbd_cdc_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\lib\STM32_USB_Device_Library\Class\cdc\src\usbd_cdc_core.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>fatfs</GroupName>
+          <Files>
+            <File>
+              <FileName>diskioF4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\diskioF4.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\ff.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm324xg_eval.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\stm324xg_eval.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm324xg_eval_sdio_sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\stm324xg_eval_sdio_sd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2375,6 +2480,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\ov7675.c</FilePath>
             </File>
+            <File>
+              <FileName>log.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\src\log.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2440,6 +2550,11 @@
               <FileType>1</FileType>
               <FilePath>.\lib\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_syscfg.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f4xx_sdio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\lib\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_sdio.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2479,6 +2594,31 @@
               <FileName>usbd_cdc_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\lib\STM32_USB_Device_Library\Class\cdc\src\usbd_cdc_core.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>fatfs</GroupName>
+          <Files>
+            <File>
+              <FileName>diskioF4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\diskioF4.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\ff.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm324xg_eval.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\stm324xg_eval.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm324xg_eval_sdio_sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fat\stm324xg_eval_sdio_sd.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -62,6 +62,7 @@
 #include "usbd_desc.h"
 #include "usbd_cdc_vcp.h"
 #include "main.h"
+#include "log.h"
 
 /* coprocessor control register (fpu) */
 #ifndef SCB_CPACR
@@ -289,7 +290,7 @@ int main(void)
 	float sonar_distance_filtered = 0.0f; // distance in meter
 	float sonar_distance_raw = 0.0f; // distance in meter
 	bool distance_valid = false;
-	//sonar_config();
+	sonar_config();
 
 	/* reset/start timers */
 	timer[TIMER_SONAR] = SONAR_TIMER_COUNT;
@@ -325,6 +326,8 @@ int main(void)
 	static uint32_t lasttime = 0;
 	uint32_t time_since_last_sonar_update= 0;
 
+	/* init sd card */
+	log_init();
 
 	/* main loop */
 	while (1)
@@ -389,10 +392,10 @@ int main(void)
 		float z_rate = z_rate_sensor; // z is correct
 
 		/* calculate focal_length in pixel */
-		const float focal_length_px = (global_data.param[PARAM_FOCAL_LENGTH_MM]) / (4.0f * 6.0f) * 1000.0f; //original focal lenght: 12mm pixelsize: 6um, binning 4 enabled
+		const float focal_length_px = (global_data.param[PARAM_FOCAL_LENGTH_MM]) / (2.5f) * 1000.0f; //original focal lenght: 12mm pixelsize: 6um, binning 4 enabled
 
 		/* get sonar data */
-		distance_valid = 1; //sonar_read(&sonar_distance_filtered, &sonar_distance_raw);
+		distance_valid = sonar_read(&sonar_distance_filtered, &sonar_distance_raw);
 
 		/* reset to zero for invalid distances */
 		if (!distance_valid) {

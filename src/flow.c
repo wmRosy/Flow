@@ -661,7 +661,7 @@ uint8_t compute_flow(uint8_t *image1, uint8_t *image2, float x_rate, float y_rat
 
 			/* compensate rotation */
 			/* calculate focal_length in pixel */
-			const float focal_length_px = (global_data.param[PARAM_FOCAL_LENGTH_MM]) / (4.0f * 6.0f) * 1000.0f; //original focal lenght: 12mm pixelsize: 6um, binning 4 enabled
+			const float focal_length_px = (global_data.param[PARAM_FOCAL_LENGTH_MM]) / (2.5f) * 1000.0f; //original focal lenght: 12mm pixelsize: 6um, binning 4 enabled
 
 			/*
 			 * gyro compensation

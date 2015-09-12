@@ -291,7 +291,7 @@ void update_TX_buffer(float pixel_flow_x, float pixel_flow_y,
 
 	/* calculate focal_length in pixel */
 	const float focal_length_px = ((global_data.param[PARAM_FOCAL_LENGTH_MM])
-			/ (4.0f * 6.0f) * 1000.0f); //original focal lenght: 12mm pixelsize: 6um, binning 4 enabled
+			/ (2.5f) * 1000.0f); //original focal lenght: 12mm pixelsize: 6um, binning 4 enabled
 
 	// reset if readout has been performed
 	if (stop_accumulation == 1) {
@@ -375,7 +375,7 @@ char readI2CAddressOffset(void) {
 	offset = offset | ((GPIO_ReadInputData(GPIOC ) >> 14) << 1); //bit 1
 	offset = offset | ((GPIO_ReadInputData(GPIOC ) >> 15) << 2); //bit 2
 	offset = (~offset) & 0x07;
-	return offset;
+	return 0;
 }
 
 char i2c_get_ownaddress1(void) {

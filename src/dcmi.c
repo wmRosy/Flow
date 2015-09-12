@@ -48,7 +48,7 @@
 #include "misc.h"
 #include "stm32f4xx.h"
 #include "ov7675.h"
-
+#include "log.h"
 /* counters */
 volatile uint8_t image_counter = 0;
 volatile uint32_t frame_counter;
@@ -241,6 +241,7 @@ uint32_t get_frame_counter(void){
  */
 void dma_copy_image_buffers(uint8_t ** current_image, uint8_t ** previous_image, uint16_t image_size, uint8_t image_step){
 
+	static int frame_counter;
 	/* swap image buffers */
 	uint8_t * tmp_image = *current_image;
 	*current_image = *previous_image;
@@ -270,6 +271,8 @@ void dma_copy_image_buffers(uint8_t ** current_image, uint8_t ** previous_image,
 		for (uint16_t pixel = 0; pixel < FULL_IMAGE_SIZE; pixel++)
 			(*current_image)[pixel] = (uint8_t)(dcmi_image_buffer_8bit_3[2*pixel-1]);
 	}
+	//log_write(*current_image,160*120);
+	frame_counter++;
 }
 
 /**
@@ -496,7 +499,7 @@ void dcmi_clock_init()
 
 //	/* TIM3 enable counter */
 //	TIM_Cmd(TIM5, ENABLE);
-	Disable_PA2();
+	//Disable_PA2();
 	MCO1_Init();
 	
 }

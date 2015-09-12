@@ -281,7 +281,7 @@ bool sonar_read(float* sonar_value_filtered, float* sonar_value_raw)
 	// check SR04 timeout
 	if (sr04_initialized && trigger_time > 0 && get_boot_time_us() - trigger_time > SONAR_TIMEOUT)
 	{
-		printf("TIMEOUT\n");
+		//printf("TIMEOUT\n");
 		sonar_valid = false;
 		trigger_time = 0;
 	}
@@ -347,7 +347,7 @@ void EXTI1_IRQHandler(void)
 			if (pulse_counter >= MIN_PULSE_COUNT)
 			{
 				distance = first_pulse_time*0.000001f * 340/2;
-				printf("%f\n", distance);
+				//printf("%f\n", distance);
 				take_mesaure(distance);
 				timeout = true;
 			}
@@ -381,7 +381,7 @@ void EXTI9_5_IRQHandler(void)
 				sonar_measure_time_interrupt = measure_time;
 				dt = ((float)(measure_time - last_measure_time)) / 1000000.0f;
 				
-				printf("R%d\n", temp);
+				//printf("R%d\n", temp);
 
 				valid_data = temp;
 				sonar_mode = insert_sonar_value_and_get_mode_value(valid_data / SONAR_SCALE);
@@ -391,7 +391,7 @@ void EXTI9_5_IRQHandler(void)
 			}
 			else
 			{
-				printf("R-1\n");
+				//printf("R-1\n");
 				sonar_valid = false;
 			}
 			rising_time = -1;
@@ -560,63 +560,56 @@ void sonar_config(void)
 	sonar_config_private();
 	valid_data = 0;
 
-//	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
 
 	/* Enable GPIO clocks */
-//	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 
-//	/* Configure l3gd20 CS pin in output pushpull mode */
-//	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-//	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-//	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-//	GPIO_Init(GPIOE, &GPIO_InitStructure);
-
+	
 	/* Configures the nested vectored interrupt controller. */
-//	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
 
-//	/* Enable the USARTx Interrupt */
-//	NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
-//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_Init(&NVIC_InitStructure);
+	/* Enable the USARTx Interrupt */
+	NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 
-//	/* Enable the USART clock */
-//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
-//	/* Enable GPIO clocks */
-//	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	/* Enable the USART clock */
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
+	/* Enable GPIO clocks */
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
-//	/* Connect UART pins to AF7 */
-//	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_UART4);
+	/* Connect UART pins to AF7 */
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_UART4);
 
-//	GPIO_InitTypeDef GPIO_InitStructure_Serial2;
-//	GPIO_InitStructure_Serial2.GPIO_Mode = GPIO_Mode_AF;
-//	GPIO_InitStructure_Serial2.GPIO_Speed = GPIO_Speed_100MHz;
-//	GPIO_InitStructure_Serial2.GPIO_OType = GPIO_OType_PP;
-//	GPIO_InitStructure_Serial2.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_InitTypeDef GPIO_InitStructure_Serial2;
+	GPIO_InitStructure_Serial2.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure_Serial2.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure_Serial2.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure_Serial2.GPIO_PuPd = GPIO_PuPd_UP;
 
-//	/* USART RX pin configuration */
-//	GPIO_InitStructure_Serial2.GPIO_Pin = GPIO_Pin_11;
-//	GPIO_Init(GPIOC, &GPIO_InitStructure_Serial2);
+	/* USART RX pin configuration */
+	GPIO_InitStructure_Serial2.GPIO_Pin = GPIO_Pin_11;
+	GPIO_Init(GPIOC, &GPIO_InitStructure_Serial2);
 
-//	USART_InitTypeDef USART_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
 
-//	USART_InitStructure.USART_BaudRate = 9600;
-//	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-//	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-//	USART_InitStructure.USART_Parity = USART_Parity_No;
-//	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-//	USART_InitStructure.USART_Mode = USART_Mode_Rx;
+	USART_InitStructure.USART_BaudRate = 9600;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx;
 
-//	/* Configure the UART4 */
-//	USART_Init(UART4, &USART_InitStructure);
+	/* Configure the UART4 */
+	USART_Init(UART4, &USART_InitStructure);
 
-//	/* Enable UART4 interrupt */
-//	USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
+	/* Enable UART4 interrupt */
+	USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
 
-//	USART_Cmd(UART4, ENABLE);
+	USART_Cmd(UART4, ENABLE);
 
 }
 
