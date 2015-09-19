@@ -352,6 +352,58 @@ void ov7675_context_configuration(void)
 		  ov7675_WriteReg(0x6f , 0x9e); //AWB控制寄存器0
 		  ov7675_WriteReg(0x09 , 0x00); //输出驱动电流1x
 		  
+		  
+		  
+		  // zhuocheng FAE black magic code (down sampling to 160*132 pix size):
+		ov7675_WriteReg(0x17 , 0x13); //输出驱动电流1x
+		ov7675_WriteReg(0x18 , 0x3b); //输出驱动电流1x
+		ov7675_WriteReg(0x32 , 0xa4); //输出驱动电流1x
+		ov7675_WriteReg(0x19 , 0x02); //输出驱动电流1x
+		ov7675_WriteReg(0x1A , 0x7b); //输出驱动电流1x
+		ov7675_WriteReg(0x03 , 0x0); //输出驱动电流1x
+
+
+		  
+		  
+		ov7675_WriteReg(0xbc , 0x12); //输出驱动电流1x
+		ov7675_WriteReg(0x92 , 0x00); //输出驱动电流1x
+		ov7675_WriteReg(0xb9 , 0x30); //输出驱动电流1x
+		ov7675_WriteReg(0xe6 , 0x09); //输出驱动电流1x
+		ov7675_WriteReg(0xe1 , 0x40); //输出驱动电流1x
+		ov7675_WriteReg(0xe4 , 0x0); //输出驱动电流1x
+		ov7675_WriteReg(0xe5 , 0xeb); //输出驱动电流1x
+		
+		ov7675_WriteReg(0xbf , 0x0); //输出驱动电流1x
+		ov7675_WriteReg(0xbe , 0x01); //输出驱动电流1x
+		ov7675_WriteReg(0x3e , 0x11); //输出驱动电流1x
+		ov7675_WriteReg(0xd2 , 0x5c); //输出驱动电流1x
+		
+		ov7675_WriteReg(0x1b, 0x08); //输出驱动电流1x
+		ov7675_WriteReg(0x75, 0x04); //输出驱动电流1x
+		
+		ov7675_WriteReg(0x6f, 0x97); //输出驱动电流1x
+		ov7675_WriteReg(0xb7, 0x66); //输出驱动电流1x
+		ov7675_WriteReg(0x6b, 0x8a); //输出驱动电流1x
+		ov7675_WriteReg(0x11, 0x02); // 帧率 调节 0x02:94HZ 0x01:140Hz
+		ov7675_WriteReg(0x2a, 0x00); //输出驱动电流1x
+		ov7675_WriteReg(0x2b, 0x42); //输出驱动电流1x
+		ov7675_WriteReg(0x9d, 0x5a); //输出驱动电流1x
+		ov7675_WriteReg(0x9e, 0x25); //输出驱动电流1x
+		
+		ov7675_WriteReg(0xa5, 0x01); //输出驱动电流1x
+		ov7675_WriteReg(0xab, 0x24); //输出驱动电流1x
+		
+		//ov7675_WriteReg(0x1e , 0x3F);//垂直旋转图像
+		//set 60hz banding filter 
+		ov7675_WriteReg(0x13, 0xe7); //banding filter enable
+		ov7675_WriteReg(0x9d, 0x98); //50Hz banding filter
+		ov7675_WriteReg(0x9e, 0x7f); //60Hz banding filter
+		ov7675_WriteReg(0xa5, 0x02); //3 step for 50hz
+		ov7675_WriteReg(0xab, 0x03); //4 step for 60hz
+		ov7675_WriteReg(0x3b, 0x02); //Select 60Hz banding filter
+				
+				  
+		  
 		  read_temp=ov7675_ReadReg(0xC2);
 		if((read_temp&0x02))
 		{
