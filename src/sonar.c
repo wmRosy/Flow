@@ -49,6 +49,7 @@
 #include "usart.h"
 #include "settings.h"
 #include "sonar.h"
+#include "i2c.h"
 #include "sonar_mode_filter.h"
 
 #define SONAR_SCALE	1000.0f
@@ -323,6 +324,8 @@ void take_mesaure(float measure)
 	new_value = 1;
 	sonar_valid = true;
 	trigger_time = 0;
+	
+	update_i2c_sonar(measure);
 }
 
 void EXTI1_IRQHandler(void)

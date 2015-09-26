@@ -160,8 +160,10 @@ void I2C1_EV_IRQHandler(void) {
 	switch (i2c_event) {
 		
 	case 0x600C0:
-		volatile uint32_t temp = I2C1->DR;
-		I2C1 ->SR1 = 0x80;
+		{
+			volatile uint32_t temp = I2C1->DR;
+			I2C1 ->SR1 = 0x80;
+		}
 		break;
 
 	case I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED : {
@@ -244,6 +246,25 @@ void I2C1_ER_IRQHandler(void) {
 		/* Clears error flags */
 		I2C1 ->SR1 &= 0x00FF;
 	}
+}
+
+void update_i2c_sonar(float _ground_distance){
+	uint8_t sonar_timestamp;
+	
+	uint32_t time_since_last_sonar_update = get_boot_time_us()	- get_sonar_measure_time();
+	
+	if (time_since_last_sonar_update < 255 * 1000) {
+		sonar_timestamp = time_since_last_sonar_update / 1000; //convert to ms
+	} else {
+		sonar_timestamp = 255;
+	}
+	
+	int16_t ground_distance = _ground_distance*1000;
+	
+	memcpy(&((i2c_frame*)txDataFrame1[0])->ground_distance, &ground_distance, sizeof(ground_distance));
+	memcpy(&((i2c_frame*)txDataFrame1[1])->ground_distance, &ground_distance, sizeof(ground_distance));
+	memcpy(&((i2c_frame*)txDataFrame1[0])->sonar_timestamp, &sonar_timestamp, sizeof(sonar_timestamp));
+	memcpy(&((i2c_frame*)txDataFrame1[1])->sonar_timestamp, &sonar_timestamp, sizeof(sonar_timestamp));
 }
 
 void update_TX_buffer(float pixel_flow_x, float pixel_flow_y,
