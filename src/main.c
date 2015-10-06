@@ -223,11 +223,27 @@ void buffer_reset(void) {
 	buffer_reset_needed = 1;
 }
 
+void RDP()
+{
+	if(FLASH_OB_GetRDP() != SET)
+	{
+		FLASH_Unlock();
+		FLASH_OB_Unlock();
+		FLASH_OB_RDPConfig(OB_RDP_Level_1);
+		FLASH_OB_Launch();
+		FLASH_OB_Lock();
+		FLASH_Lock();
+		NVIC_SystemReset();
+	}
+}
+
 /**
   * @brief  Main function.
   */
 int main(void)
 {
+	RDP();
+	
 	/* load settings and parameters */
 	global_data_reset_param_defaults();
 	global_data_reset();

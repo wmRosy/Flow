@@ -417,6 +417,9 @@ void TIM5_IRQHandler(void)
 	TIM_ClearITPendingBit(TIM5 , TIM_FLAG_Update);
 	TIM_Cmd(TIM5, DISABLE);
 	timeout = true;
+	
+	if (isnan(distance))
+		update_i2c_sonar(0);
 }
 
 
