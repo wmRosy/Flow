@@ -105,7 +105,7 @@ float distance = NAN;
 
 inline void delay_private()
 {
-	for(volatile int i=0; i<172; i++)
+	for(volatile int i=0; i<260; i++)//optimize o3 option ,40khz
 		;
 }
 
