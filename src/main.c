@@ -63,6 +63,7 @@
 #include "usbd_cdc_vcp.h"
 #include "main.h"
 #include "log.h"
+#include "mpu6050.h"
 
 /* coprocessor control register (fpu) */
 #ifndef SCB_CPACR
@@ -124,6 +125,9 @@ struct lpos_t {
 	float vz;
 } lpos = {0};
 
+
+int mpu6050_temp;
+short gx,gy,gz;
 /**
   * @brief  Increment boot_time_ms variable and decrement timer array.
   * @param  None
@@ -268,7 +272,10 @@ int main(void)
 	enable_image_capture();
 
 	/* gyro config */
-	//gyro_config();
+	//gyro_config(); //we dont't use l3gd20
+	
+	/* MPU6050 gyro accelorator init */
+	MPU_Init(); 
 
 	/* init and clear fast image buffers */
 	for (int i = 0; i < global_data.param[PARAM_IMAGE_WIDTH] * global_data.param[PARAM_IMAGE_HEIGHT]; i++)
@@ -328,7 +335,7 @@ int main(void)
 
 	/* init sd card */
 	log_init();
-
+	
 	/* main loop */
 	while (1)
 	{
@@ -382,14 +389,15 @@ int main(void)
 		uint16_t image_size = global_data.param[PARAM_IMAGE_WIDTH] * global_data.param[PARAM_IMAGE_HEIGHT];
 
 		/* new gyroscope data */
-		float x_rate_sensor=0, y_rate_sensor=0, z_rate_sensor=0;
+		short x_rate_sensor=0, y_rate_sensor=0, z_rate_sensor=0;
 		int16_t gyro_temp=0;
-		//gyro_read(&x_rate_sensor, &y_rate_sensor, &z_rate_sensor,&gyro_temp);
-
+		//gyro_read(&x_rate_sensor, &y_rate_sensor, &z_rate_sensor,&gyro_temp); //this is for l3gd20
+		MPU_Get_Gyroscope(&x_rate_sensor, &y_rate_sensor, &z_rate_sensor); //the sign of gyro not mesaure 
+		gyro_temp=(uint16_t)(MPU_Get_Temperature()/100);
 		/* gyroscope coordinate transformation */
 		float x_rate = y_rate_sensor; // change x and y rates
-		float y_rate = - x_rate_sensor;
-		float z_rate = z_rate_sensor; // z is correct
+		float y_rate =  x_rate_sensor;
+		float z_rate = -z_rate_sensor; // z is correct
 
 		/* calculate focal_length in pixel */
 		const float focal_length_px = (global_data.param[PARAM_FOCAL_LENGTH_MM]) / (2.5f) * 1000.0f; //original focal lenght: 12mm pixelsize: 6um, binning 4 enabled
